@@ -56,48 +56,91 @@
                 app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
             <LinearLayout
-                android:id="@+id/linearLayout"
+                android:id="@+id/llFromExchange"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="8dp"
                 android:layout_marginTop="36dp"
+                android:gravity="center"
+                android:weightSum="7"
                 android:background="@drawable/bg_rounded_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <EditText
+                    android:layout_width="0dp"
+                    android:importantForAutofill="no"
                     android:layout_height="wrap_content"
-                    android:text="R$ 1.000,00"/>
+                    android:layout_weight="4"
+                    android:minHeight="48dp"
+                    android:inputType="number"
+                    tools:text="R$ 1.000,00"
+                    android:background="@android:color/transparent" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/img_divider"
+                    android:importantForAccessibility="no"/>
+
+                <Spinner
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:padding="8dp"
+                    tools:listitem="@layout/item_currency_type"/>
 
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/imageView2"
+                android:id="@+id/ivArrowsExchange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:src="@drawable/ic_arrows_exchange"
-                app:layout_constraintTop_toBottomOf="@id/linearLayout"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/llToExchange"
+                app:layout_constraintTop_toBottomOf="@id/llFromExchange"/>
 
             <LinearLayout
-                android:id="@+id/linearLayout2"
+                android:id="@+id/llToExchange"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_rounded_content"
                 android:orientation="horizontal"
                 android:padding="8dp"
+                android:gravity="center"
+                android:weightSum="7"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/imageView2">
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivArrowsExchange">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <EditText
+                    android:layout_width="0dp"
+                    android:importantForAutofill="no"
                     android:layout_height="wrap_content"
-                    android:text="R$ 1.000,00" />
+                    android:layout_weight="4"
+                    android:minHeight="48dp"
+                    android:inputType="number"
+                    tools:text="R$ 1.000,00"
+                    android:background="@android:color/transparent" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/img_divider"/>
+
+                <Spinner
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:padding="8dp"
+                    tools:listitem="@layout/item_currency_type"/>
 
             </LinearLayout>
 
