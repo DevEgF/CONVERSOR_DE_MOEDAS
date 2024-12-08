@@ -86,6 +86,7 @@
                     android:importantForAccessibility="no"/>
 
                 <Spinner
+                    android:id="@+id/spnFromExchange"
                     android:layout_width="0dp"
                     android:minHeight="48dp"
                     android:layout_height="wrap_content"
