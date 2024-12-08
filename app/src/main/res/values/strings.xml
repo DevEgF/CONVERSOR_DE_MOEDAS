@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ConversorDeMoedas</string>
+    <string name="conversor_de_moedas">Conversor de moedas</string>
+    <string name="digite_o_valor_e_escolha_as_moedas">Digite o valor e escolha as moedas de conversão</string>
+</resources>
