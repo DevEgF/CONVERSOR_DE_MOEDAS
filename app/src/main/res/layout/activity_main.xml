@@ -87,10 +87,10 @@
 
                 <Spinner
                     android:layout_width="0dp"
+                    android:minHeight="48dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:padding="8dp"
-                    tools:listitem="@layout/item_currency_type"/>
+                    tools:listitem="@layout/item_currency_type"
+                    android:layout_weight="3" />
 
             </LinearLayout>
 
@@ -136,11 +136,12 @@
                     android:src="@drawable/img_divider"/>
 
                 <Spinner
+                    android:id="@+id/spnToExchange"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:padding="8dp"
-                    tools:listitem="@layout/item_currency_type"/>
+                    android:minHeight="48dp"
+                    tools:listitem="@layout/item_currency_type" />
 
             </LinearLayout>
 
