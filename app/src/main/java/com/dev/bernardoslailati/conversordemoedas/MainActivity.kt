@@ -1,6 +1,7 @@
 package com.dev.bernardoslailati.conversordemoedas
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -24,14 +25,25 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        lifecycleScope.launch {
-            viewModel.currencyTypes.collect { result ->
-                result.onSuccess {
-                    Toast.makeText(this@MainActivity, it.size.toString(),
-                        Toast.LENGTH_LONG).show()
-                }.onFailure {
-                    Toast.makeText(this@MainActivity, it.message,
-                        Toast.LENGTH_LONG).show()
+        lifecycleScope.apply {
+            launch {
+                viewModel.currencyTypes.collect { result ->
+                    result.onSuccess {
+                        Toast.makeText(this@MainActivity, it.size.toString(),
+                            Toast.LENGTH_LONG).show()
+                    }.onFailure {
+                        Toast.makeText(this@MainActivity, it.message,
+                            Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            launch {
+                viewModel.exchangeRate.collect { result ->
+                    result.onSuccess {
+                        Log.d("MainActivity", it.toString())
+                    }.onFailure {
+                        Log.d("MainActivity", it.message.toString())
+                    }
                 }
             }
         }

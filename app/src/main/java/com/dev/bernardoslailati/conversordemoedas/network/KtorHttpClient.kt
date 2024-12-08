@@ -1,6 +1,7 @@
 package com.dev.bernardoslailati.conversordemoedas.network
 
 import com.dev.bernardoslailati.conversordemoedas.network.model.CurrencyTypesResult
+import com.dev.bernardoslailati.conversordemoedas.network.model.ExchangeRateResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -22,6 +23,10 @@ object KtorHttpClient {
 
     suspend fun getCurrencyTypes(): Result<CurrencyTypesResult> {
         return requireGet(url = "$BASE_URL/currency_types")
+    }
+
+    suspend fun getExchangeRate(from: String, to: String): Result<ExchangeRateResult> {
+        return requireGet(url = "$BASE_URL/exchange_rate/$from/$to")
     }
 
     private suspend inline fun <reified T> requireGet(url: String): Result<T> {
