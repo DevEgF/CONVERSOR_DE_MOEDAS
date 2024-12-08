@@ -3,6 +3,7 @@ package com.dev.bernardoslailati.conversordemoedas.network.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 data class CurrencyType(
     val name: String,
@@ -13,6 +14,6 @@ data class CurrencyType(
 )
 
 @Serializable
-data class CurrencyTypeResult(
+data class CurrencyTypesResult(
     val values: List<CurrencyType>
 )
