@@ -1,12 +1,11 @@
 package com.dev.bernardoslailati.conversordemoedas
 
-import android.icu.text.DecimalFormat
-import android.icu.text.DecimalFormatSymbols
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -17,8 +16,12 @@ import androidx.lifecycle.lifecycleScope
 import com.dev.bernardoslailati.conversordemoedas.databinding.ActivityMainBinding
 import com.dev.bernardoslailati.conversordemoedas.databinding.ContentExchangeRateSucessBinding
 import com.dev.bernardoslailati.conversordemoedas.network.model.CurrencyType
+import com.dev.bernardoslailati.conversordemoedas.network.model.ExchangeRateResult
 import com.dev.bernardoslailati.conversordemoedas.ui.CurrencyTypesAdapter
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -38,8 +41,7 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(
                 systemBars.left,
-                systemBars.top,
-                systemBars.right,
+                systemBars.top, systemBars.right,
                 systemBars.bottom
             )
             insets
@@ -56,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
             lifecycleScope.apply {
                 launch {
-                    viewModel.currencyTypes.collect { result ->
+                    viewModel.currencyTypes.collectLatest { result ->
                         result.onSuccess { currencyTypes ->
                             showContentSuccess()
                             lExchangeRateSuccess.configureCurrencyTypesSpinners(currencyTypes = currencyTypes)
@@ -66,13 +68,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 launch {
-                    viewModel.exchangeRate.collect { result ->
+                    viewModel.exchangeRate.collectLatest { result ->
                         result.onSuccess { exchangeRateResult ->
-                            exchangeRateResult?.let{
-                                showContentSuccess()
-                                exchangeRate = it.exchangeRate
-                                lExchangeRateSuccess.generateConvertedValue()
-                            }
+                            if (exchangeRateResult == ExchangeRateResult.empty())
+                                return@collectLatest
+
+                            showContentSuccess()
+                            exchangeRate = exchangeRateResult.exchangeRate
+                            lExchangeRateSuccess.generateConvertedValue()
                         }.onFailure {
                             showContentError()
                         }
@@ -85,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     private fun ContentExchangeRateSucessBinding.configureCurrencyTypesSpinners(currencyTypes: List<CurrencyType>) {
         spnFromExchange.apply {
             adapter = CurrencyTypesAdapter(currencyTypes)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
                     view: View?,
@@ -103,14 +106,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
-
             }
         }
 
 
         spnToExchange.apply {
             adapter = CurrencyTypesAdapter(currencyTypes)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            onItemSelectedListener = object : OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
                     view: View?,
