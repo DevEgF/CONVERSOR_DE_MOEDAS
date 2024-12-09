@@ -1,9 +1,14 @@
 package com.dev.bernardoslailati.conversordemoedas
 
+import android.icu.text.DecimalFormat
+import android.icu.text.DecimalFormatSymbols
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -15,6 +20,7 @@ import com.dev.bernardoslailati.conversordemoedas.databinding.ActivityMainBindin
 import com.dev.bernardoslailati.conversordemoedas.network.model.CurrencyType
 import com.dev.bernardoslailati.conversordemoedas.ui.CurrencyTypesAdapter
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.requireCurrencyTypes()
+        binding.etFromExchangeValue.addCurrencyMask()
 
         lifecycleScope.apply {
             launch {
@@ -46,8 +53,10 @@ class MainActivity : AppCompatActivity() {
                     result.onSuccess { currencyTypes ->
                         binding.configureCurrencyTypes(currencyTypes = currencyTypes)
                     }.onFailure {
-                        Toast.makeText(this@MainActivity, it.message,
-                            Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@MainActivity, it.message,
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
@@ -76,6 +85,7 @@ class MainActivity : AppCompatActivity() {
                     val from = currencyTypes[position]
                     val to = currencyTypes[spnToExchange.selectedItemPosition]
 
+                    tvFromCurrencySymbol.text = from.symbol
                     viewModel.requireExchangeRate(
                         from = from.acronym,
                         to = to.acronym
@@ -100,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                     val from = currencyTypes[spnFromExchange.selectedItemPosition]
                     val to = currencyTypes[position]
 
+                    tvToCurrencySymbol.text = to.symbol
                     viewModel.requireExchangeRate(
                         from = from.acronym,
                         to = to.acronym
@@ -108,6 +119,8 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                     currencyTypes.firstOrNull()?.let { firstCurrencyType ->
+                        tvFromCurrencySymbol.text = firstCurrencyType.symbol
+                        tvToCurrencySymbol.text = firstCurrencyType.symbol
                         viewModel.requireExchangeRate(
                             from = firstCurrencyType.acronym,
                             to = firstCurrencyType.acronym
@@ -116,5 +129,43 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun EditText.addCurrencyMask() {
+        addTextChangedListener(
+            object : TextWatcher {
+                private var currentText = ""
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (s.toString() != currentText) {
+                        removeTextChangedListener(this)
+
+                        val cleanedString = s.toString().replace("[,.]".toRegex(), "")
+                        val currencyValue = cleanedString.toDoubleOrNull() ?: 0.0
+
+                        val formattedValue = DecimalFormat(
+                            "#,##0.00",
+                            DecimalFormatSymbols(Locale.getDefault())
+                        ).format(currencyValue / 100)
+                        currentText = formattedValue
+                        setText(formattedValue)
+                        setSelection(formattedValue.length)
+
+                        addTextChangedListener(this)
+                    }
+                }
+            }
+        )
     }
 }
