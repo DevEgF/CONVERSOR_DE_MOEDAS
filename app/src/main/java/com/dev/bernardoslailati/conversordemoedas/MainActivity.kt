@@ -5,11 +5,9 @@ import android.icu.text.DecimalFormatSymbols
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.dev.bernardoslailati.conversordemoedas.databinding.ActivityMainBinding
+import com.dev.bernardoslailati.conversordemoedas.databinding.ContentExchangeRateSucessBinding
 import com.dev.bernardoslailati.conversordemoedas.network.model.CurrencyType
 import com.dev.bernardoslailati.conversordemoedas.ui.CurrencyTypesAdapter
 import kotlinx.coroutines.launch
@@ -46,41 +45,44 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        viewModel.requireCurrencyTypes()
-        binding.etFromExchangeValue.addCurrencyMask()
+        with(binding) {
+            viewModel.requireCurrencyTypes()
+            lExchangeRateSuccess.etFromExchangeValue.addCurrencyMask()
 
-        lifecycleScope.apply {
-            launch {
-                viewModel.currencyTypes.collect { result ->
-                    result.onSuccess { currencyTypes ->
-                        binding.configureCurrencyTypes(currencyTypes = currencyTypes)
-                    }.onFailure {
-                        Toast.makeText(
-                            this@MainActivity, it.message,
-                            Toast.LENGTH_LONG
-                        ).show()
+            lExchangeRateError.btnTryAgain.setOnClickListener {
+                showContentLoading()
+                viewModel.requireCurrencyTypes()
+            }
+
+            lifecycleScope.apply {
+                launch {
+                    viewModel.currencyTypes.collect { result ->
+                        result.onSuccess { currencyTypes ->
+                            showContentSuccess()
+                            lExchangeRateSuccess.configureCurrencyTypesSpinners(currencyTypes = currencyTypes)
+                        }.onFailure {
+                            showContentError()
+                        }
                     }
                 }
-            }
-            launch {
-                viewModel.exchangeRate.collect { result ->
-                    result.onSuccess { exchangeRateResult ->
-                        exchangeRateResult?.let{
-                            exchangeRate = it.exchangeRate
-                            binding.generateConvertedValue()
+                launch {
+                    viewModel.exchangeRate.collect { result ->
+                        result.onSuccess { exchangeRateResult ->
+                            exchangeRateResult?.let{
+                                showContentSuccess()
+                                exchangeRate = it.exchangeRate
+                                lExchangeRateSuccess.generateConvertedValue()
+                            }
+                        }.onFailure {
+                            showContentError()
                         }
-                    }.onFailure {
-                        Toast.makeText(
-                            this@MainActivity, it.message,
-                            Toast.LENGTH_LONG
-                        ).show()
                     }
                 }
             }
         }
     }
 
-    private fun ActivityMainBinding.configureCurrencyTypes(currencyTypes: List<CurrencyType>) {
+    private fun ContentExchangeRateSucessBinding.configureCurrencyTypesSpinners(currencyTypes: List<CurrencyType>) {
         spnFromExchange.apply {
             adapter = CurrencyTypesAdapter(currencyTypes)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -170,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                         setText(formattedValue)
                         setSelection(formattedValue.length)
 
-                        binding.generateConvertedValue()
+                        binding.lExchangeRateSuccess.generateConvertedValue()
 
                         addTextChangedListener(this)
                     }
@@ -179,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun ActivityMainBinding.generateConvertedValue() {
+    private fun ContentExchangeRateSucessBinding.generateConvertedValue() {
         exchangeRate?.let {
             val cleanedString = etFromExchangeValue.text.toString().replace("[,.]".toRegex(), "")
             val currencyValue = cleanedString.toDoubleOrNull() ?: 0.0
@@ -191,5 +193,23 @@ class MainActivity : AppCompatActivity() {
 
             tvToExchangeValue.text = formattedValue
         }
+    }
+
+    private fun ActivityMainBinding.showContentError() {
+        pbLoading.visibility = View.GONE
+        lExchangeRateError.root.visibility = View.VISIBLE
+        lExchangeRateSuccess.root.visibility = View.GONE
+    }
+
+    private fun ActivityMainBinding.showContentSuccess() {
+        pbLoading.visibility = View.GONE
+        lExchangeRateError.root.visibility = View.GONE
+        lExchangeRateSuccess.root.visibility = View.VISIBLE
+    }
+
+    private fun ActivityMainBinding.showContentLoading() {
+        pbLoading.visibility = View.VISIBLE
+        lExchangeRateError.root.visibility = View.GONE
+        lExchangeRateSuccess.root.visibility = View.GONE
     }
 }
